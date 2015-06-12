@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>3D Sierpinski Gasket</title>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 vPosition;
+attribute vec3 vColor;
+varying vec4 color;
+
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform mat4 PerspectiveMatrix;
+
+void
+main()
+{
+	gl_Position = PerspectiveMatrix * ProjectionMatrix * ModelViewMatrix * vec4(vPosition, 1.0);
+	color = vec4(vColor, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+
+precision mediump float;
+
+varying vec4 color;
+
+void
+main()
+{
+	vec3 z;
+    float x,y;
+    int steps;
+    float newX = (gl_FragCoord.x - 250.0) / 200.0 * 2.0;
+    float newY = (gl_FragCoord.y - 250.0) / 200.0 * 2.0;
+ 
+    z.x = newX - 0.6;
+    z.y = newY;
+ 
+	//Create circle
+    for (int i=0;i<2;i++) 
+	{
+		steps = i;
+        x = (z.x * z.x - z.y * z.y) + newX;
+        y = (z.y * z.x + z.x * z.y) + newY;
+ 
+        if((x * x + y * y) > 4.0)
+		{
+			break;
+		}
+    }
+ 
+	//Render flashlight circle
+    if (steps == 1)
+	{
+      gl_FragColor = color;
+	}
+	//Render darkened background
+    else
+	{
+     gl_FragColor = vec4(gl_FragCoord.x / 640.0, gl_FragCoord.y / 480.0, gl_FragCoord.z, 1) * color;
+	}
+    
+	//gl_FragColor = vec4(gl_FragCoord.x / 640.0, gl_FragCoord.y / 480.0, gl_FragCoord.z, 1) * color;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="gasket4.js"></script>
+</head>  
+
+
+<center>
+
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+<div>
+<p> Translation/Rotation Mode </p>
+<button id="freeTrans">Push Gasket </button>
+<button id="rotX">Rotate X</button>
+<button id="rotY">Rotate Y</button> 
+<button id="rotZ">Rotate Z</button>  
+<button id="reset">Refresh</button> 
+</div>
+
+<div id="subdivs">
+Subdivisions 1 <input id="slide" type="range"
+ min="1" max="4" step="1" value="0"
+  /> 4
+</div><br/>
+
+<div id="fov">
+Field of View 50 <input id="slide" type="range"
+ min="0" max="5" step="1" value="0"
+  /> 100
+</div><br/>
+
+<div>
+
+<center>
+
+<p> Instructions </p>
+<p> CAMERA MOVEMENT</p>
+<p> Use 'W-A-S-D-Q-E' keys to move the Camera. (W/S) Moves forward/backward. (A/D) Strafes left and right. (Q/E) Moves down and up. </p>
+<p> Click and drag in from a side of the screen to move the camera position. Make sure a rotate mode/ push gasket mode is not selected. </p>
+<p>                </p>
+<p> GASKET INTERACTION</p>
+<p> Use the ARROW keys to Translate the Gasket on X/Y axis. Use SHIFT/CTRL to move the Gasket the Z Axis </p>
+<p> For some Physics-based interaction, use the Push Gasket button. Then, push the gasket from a side with the cursor down. </p>
+<p> To rotate the gasket, click a rotate mode and use the mouse to rotate the gasket on that axis. Click the rotate mode again to disable rotation on that axis. . </p>
+
+
+<center>
+
+</div>
+
+</div>
+
+
+</center>
+</body>
+</html>

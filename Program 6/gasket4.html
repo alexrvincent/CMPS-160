@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Sphere Lighting</title>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 vPosition;
+attribute vec4 vNormal;
+attribute vec3 vColor;
+attribute vec2 vTexCoord;
+
+varying vec4 color;
+varying vec2 fTexCoord;
+
+varying float intensity_x;
+varying float intensity_y;
+varying float intensity_z;
+varying float intensity;
+varying float perlin0;
+varying float perlin1;
+varying float perlin2;
+varying vec3 N, L, E;
+
+uniform vec4 lightPosition;
+uniform mat4 ModelViewMatrix;
+uniform mat4 ProjectionMatrix;
+uniform mat4 PerspectiveMatrix;
+
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+void
+main()
+{
+	
+	
+	intensity_x = dot(vNormal.x, lightPosition.x);
+	intensity_y = dot(vNormal.y, lightPosition.y);
+	intensity_z = dot(vNormal.z, lightPosition.z);
+	intensity = (intensity_x + intensity_y + intensity_z)/3.0;
+	perlin0 = rand(vec2(intensity_x, intensity_y));
+	perlin1 = rand(vec2(intensity_y, intensity_z));
+	perlin2 = rand(vec2(intensity_x, intensity_z));
+	normalize(perlin0);
+	normalize(perlin1);
+	normalize(perlin2);
+	vec3 pos = -(ModelViewMatrix * vec4(vPosition, 1.0)).xyz;
+    vec3 light = lightPosition.xyz;
+    L = normalize( light - pos );
+    E =  -pos;
+    N = normalize( (ModelViewMatrix*vNormal).xyz);
+	
+    gl_Position = PerspectiveMatrix * ProjectionMatrix * ModelViewMatrix * vec4(vPosition, 1.0);
+	
+	//gl_Position = PerspectiveMatrix * ProjectionMatrix * ModelViewMatrix * vec4(vPosition, 1.0);
+	fTexCoord = vTexCoord;
+	color = vec4(vColor, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+
+precision mediump float;
+
+varying vec4 color;
+varying vec2 fTexCoord;
+
+varying float intensity_x;
+varying float intensity_y;
+varying float intensity_z;
+varying float intensity;
+varying float perlin0;
+varying float perlin1;
+varying float perlin2;
+uniform float shading;
+uniform float texture_tog;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform sampler2D texture;
+
+uniform float shininess;
+varying vec3 N, L, E;
+
+
+void
+main()
+{
+	if(shading == 0.0) 
+	{ 
+		gl_FragColor = color; 
+		if(texture_tog == 1.0)
+		gl_FragColor = texture2D( texture, fTexCoord ) * color;
+	}
+	if(shading == 1.0)
+	{
+		vec4 fColor;
+    
+		vec3 H = normalize( L + E );
+		vec4 ambient = ambientProduct;
+
+		float Kd = max( dot(L, N), 0.0 );
+		vec4 diffuse = Kd*diffuseProduct;
+
+		float Ks = pow( max(dot(N, H), 0.0), shininess );
+		vec4 specular = Ks * specularProduct;
+    
+		if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+		// Phong Lighting Equation //
+		fColor = ambient + diffuse +specular;
+		fColor.a = 1.0;
+
+		gl_FragColor = fColor * color;
+		if(texture_tog == 1.0)
+			gl_FragColor = fColor * texture2D( texture, fTexCoord ) * color;
+	}
+	
+	else if (shading == 2.0)
+	{
+		gl_FragColor = vec4(0, 0, 0 , perlin1);
+		if(texture_tog == 1.0)
+		gl_FragColor = vec4(0, 0, 0 , perlin1) * texture2D( texture, fTexCoord );
+	}
+	if (shading == 3.0)
+	{
+		if (intensity > 0.95)
+			gl_FragColor = vec4(1.0,0.5,0.5,1.0);
+		else if (intensity > 0.5)
+			gl_FragColor = vec4(0.6,0.3,0.3,1.0);
+		else if (intensity > 0.25)
+			gl_FragColor = vec4(0.4,0.2,0.2,1.0);
+		else
+			gl_FragColor = vec4(0.2,0.1,0.1,1.0);
+	}
+	
+}
+
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="gasket4.js"></script>
+</head>  
+
+
+<center>
+
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+<div>
+<p> Shading Mode: </p>
+<div id="shading_name">Phong Shading</div>
+<p>               </p>
+<button id="change">Change Texture</button>
+<button id="texture">Toggle Texture</button>
+<button id="Gouraud">Change Lighting</button>
+<button id="toggle">Toggle Lighting</button>
+<button id="freeTrans">Push Sphere </button>
+<button id="rotX">Rotate X</button>
+<button id="rotY">Rotate Y</button> 
+<button id="rotZ">Rotate Z</button>  
+<button id="reset">Refresh</button> 
+</div>
+
+<div id="fov">
+Field of View 50 <input id="slide" type="range"
+ min="0" max="5" step="1" value="0"
+  /> 100
+</div><br/>
+
+<div>
+
+<p> Texture Filtering</p>
+<div> <select id = "Texture Style" size = 4>
+		<option value = "0">Nearest</option>
+		<option value = "1">Linear</option>
+		<option value = "2">MipMap Nearest</option>
+		<option value = "3">MipMap Linear</option>
+		</select></div>
+<center>
+
+<p> CAMERA MOVEMENT</p>
+<p> Use 'W-A-S-D-Q-E' keys to move the Camera. (W/S) Moves forward/backward. (A/D) Strafes left and right. (Q/E) Moves down and up. </p>
+<p> Click and drag in from a side of the screen to move the camera position. Make sure a rotate mode/ push gasket mode is not selected. </p>
+<p>                </p>
+<p> SPHERE INTERACTION</p>
+<p> Use the ARROW keys to Translate the Sphere on X/Y axis. Use SHIFT/CTRL to move the Sphere the Z Axis </p>
+<p> For some Physics-based interaction, use the Push Sphere button. Then, push the Sphere from a side with the cursor down. </p>
+<p> To rotate the sphere, click a rotate mode and use the mouse to rotate the sphere on that axis. Click the rotate mode again to disable rotation on that axis. </p>
+<p>                </p>
+<p> LIGHT/SHADING INTERACTION </p>
+<p> Use 'I-J-K-L-U-O' keys to move the light. (I/K) Moves forward/backward. (J/L) Strafes left and right. (U/O) Moves down and up. </p>
+<p> Click the 'Change Lighting' button to change the shading. Press 'C' to toggle the light. Press 'Refresh' to return to Phong shading</p>
+
+<center>
+
+</div>
+
+</div>
+
+
+</center>
+
+<img id = "ground" src = "ground.jpg" hidden>></img>
+<img id = "grass" src = "grass2.jpg" hidden>></img>
+<img id = "check" src = "check.jpg" hidden>></img>
+
+</body>
+</html>

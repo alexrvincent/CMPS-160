@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>3D Sierpinski Gasket</title>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 vPosition;
+attribute vec3 vColor;
+varying vec4 color;
+
+uniform mat4 u_matrix;
+
+void
+main()
+{
+	gl_Position = u_matrix * vec4(vPosition, 1.0);
+	color = vec4(vColor, 1.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+   
+varying vec4 color;
+
+void
+main()
+{
+    gl_FragColor = color;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="gasket4.js"></script>
+</head>  
+
+
+<center>
+
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+
+<div>
+<p> Translation/Rotation Mode </p>
+<button id="freeTrans">Free Translate</button>
+<button id="rotX">Rotate X</button>
+<button id="rotY">Rotate Y</button> 
+<button id="rotZ">Rotate Z</button>  
+<button id="reset">Refresh</button> 
+</div>
+
+<div id="subdivs">
+Subdivisions 1 <input id="slide" type="range"
+ min="1" max="4" step="1" value="0"
+  /> 4
+</div><br/>
+
+<div id="noise">
+Plane Height Variation 1 <input id="slide" type="range"
+ min="1" max="4" step="1" value="0"
+  /> 4
+</div><br/>
+
+<div>
+
+<center>
+
+<p> Instructions: </p>
+<p> Use 'W-A-S-D-Q-E' keys to translate the Gasket on the X-axis (A/D), Y-axis(W/S), and Z-axis (Q/E) </p>
+<p> Alternatively, use the "Free Translate" button to move the Gasket with your mouse. Press the button again to lock to gasket. </p>
+<p> To rotate the gasket, click a rotate mode and use the mouse to rotate the gasket on that axis. Click the rotate mode again to disable rotation on that axis. . </p>
+
+
+<center>
+
+</div>
+
+</div>
+
+
+</center>
+</body>
+</html>

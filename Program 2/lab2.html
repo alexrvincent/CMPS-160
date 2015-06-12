@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Interactive Gasket - Alex Vincent</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform float theta;
+
+
+void
+main()
+{
+    //float s = sin( theta );
+    //float c = cos( theta );
+	
+	gl_Position = vPosition;
+
+    //gl_Position.x = -s * vPosition.x + c * vPosition.y;
+    //gl_Position.y =  s * vPosition.y + c * vPosition.x;
+    //gl_Position.z = 0.0;
+    //gl_Position.w = 1.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+uniform float gasRed;
+uniform float gasGreen;
+uniform float gasBlue;
+
+void
+main()
+{
+    gl_FragColor = vec4( gasRed, gasGreen, gasBlue, 1.0 );
+}
+</script>
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="rotatingSquare3.js"></script>
+</head>   
+
+<body>
+
+<center>
+
+<center>
+
+<p> Score: </p>
+<div id="score">0</div>
+
+</canvas>
+
+<center>
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+
+<center>
+
+
+<button id="BackColor">Random Background Color</button>
+<button id="Color">Random Gasket Color</button>
+<button id="Clear">Reset</button>
+<button id="Refresh">Refresh Page</button>
+<button id="follow"> Follow!</button>
+<button id="GameOn">Game On!</button>
+<div>
+Subdivisions 0 <input id="subdivs" type="range"
+ min="0" max="50" step="10" value="1" />
+ 5
+</div>
+
+<div>
+Shrink 0 <input id="scale" type="range"
+ min="0" max="50" step="10" value="1" />
+ 5
+</div>
+
+<div>
+Straighten 0 <input id="heightoff" type="range"
+ min="0" max="50" step="10" value="1" />
+ 5
+</div>
+
+
+<center>
+
+<center>
+
+<p> Instructions: </p>
+<p> 1) Use the Buttons and Sliders to Manipulate the Gasket Color and Shape </p>
+<p> 3) Press 'R', 'G', or 'B' to change the color to red, green, or blue. </p>
+<p> 4) Click and drag to move the Gasket around </p>
+<p> 5) Click 'Follow' for some Physics-based movement. The Gasket will follow the cursor! </p>
+
+<center>
+
+<div>
+<center>
+<p> How to Play Game On! </p>
+<p> 1) Hit the 'Refresh Page' button </p>
+<p> 2) Click Game On! </p>
+<p> 3) SCORE points by clicking the screen when the gasket is GREEN. </p>
+<p> 4) LOSE points by clicking the screen when the gasket is RED. </p>
+<p> 5) Can you get to a score of 100? </p>
+</div>
+
+<center>
+
+
+</body>
+</html>
